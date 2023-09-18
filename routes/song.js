@@ -101,5 +101,34 @@ router.get('/stream', async  (req, res) => {
         console.error('Error search:', error);
     }
 });
-
+router.get('/sendSong',async(req,res)=>{
+    console.log('trying to send the mp3 audio');
+    let videoUrl = req.query.video_url; // URL of the YouTube video
+    try {
+      const mp3FilePath = path.join(__dirname, `../Songs/${videoUrl}.mp3`);
+    
+      // Check if the file exists
+      if (fs.existsSync(mp3FilePath)) {
+        const stat = fs.statSync(mp3FilePath);
+        
+        // Set the response headers
+        res.writeHead(200, {
+          'Content-Type': 'audio/mpeg',
+          'Content-Length': stat.size,
+        });
+        
+        // Stream the MP3 file as the response
+        const stream = fs.createReadStream(mp3FilePath);
+        stream.pipe(res);
+        console.log('song sent');
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end("MP3 file not found");
+      }
+        
+    } catch (error) {
+        console.error('Error send the song:', error);
+    }
+   
+  });
 module.exports = router;
